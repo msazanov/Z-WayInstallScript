@@ -22,16 +22,16 @@ fi
 
 
 # Cancel installation if distribution is not supported
-if [[ "${distro}" != "buster" -a "${distro}" != "bullseye" -a "${distro}" != "focal" ]]
-then
-	echo
-	echo "Your Linux distribution is currently not supported by Z-Way"
-	echo "Please contact Z-Wave.Me support for more information"
-	echo "Supported Raspbian or Debian distributions are Buster and Bullseye"
-	echo "Supported Ubuntu distribution are 20.04 and upper"
-	echo
-	exit 1
+if [[ "${distro}" != "buster" && "${distro}" != "bullseye" && "${distro}" != "focal" ]]; then
+    echo
+    echo "Your Linux distribution is currently not supported by Z-Way"
+    echo "Please contact Z-Wave.Me support for more information"
+    echo "Supported Raspbian or Debian distributions are Buster and Bullseye"
+    echo "Supported Ubuntu distribution are 20.04 and upper"
+    echo
+    exit 1
 fi
+
 
 # Check architecture	
 architecture=$(uname -m)
