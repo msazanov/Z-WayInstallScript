@@ -1,19 +1,30 @@
 #!/bin/bash
 
-# Remove old key
+# Remove any existing Z-Wave.Me repository to avoid conflicts
 rm -f /etc/apt/sources.list.d/z-wave-me.list
 
-# Install additional packages
+# Update package list and install necessary packages for adding the Z-Wave.Me repository
 apt-get update -y --allow-releaseinfo-change
-apt-get install -y dirmngr apt-transport-https gnupg wget lsb-release
+apt-get install dirmngr apt-transport-https gnupg wget -y
 
-# Get distro and distro_id
-if [ -f /etc/os-release ]; then
-    distro=$(grep VERSION_CODENAME /etc/os-release | awk -F"=" '{print $2}')
-    distro_id=$(grep -E "^ID=" /etc/os-release | awk -F"=" '{print $2}')
+# Check the Linux distribution and its version
+# First, try using the built-in lsb_release tool if it's available
+apt-get install lsb_release >/dev/null 2>&1
+
+# If lsb_release is available, use it to get the distribution and version information
+# Otherwise, use /etc/os-release to obtain the same information
+if command -v lsb_release > /dev/null; then
+    distro=$(lsb_release -a 2>/dev/null | grep Codename | awk '{print $2}')
+    distro_id=$(lsb_release -a 2>/dev/null | grep "Distributor ID" | awk '{print $3}' | tr '[:upper:]' '[:lower:]')
+else
+    if [ -f /etc/os-release ]; then
+        distro=$(grep VERSION_CODENAME /etc/os-release | awk -F"=" '{print $2}')
+        distro_id=$(grep -E "^ID=" /etc/os-release | awk -F"=" '{print $2}')
+    fi
 fi
 
-# Check for supported distro
+# Check if the distribution is supported by Z-Way
+# If not, cancel the installation and display an error message
 if [[ "${distro}" != "buster" && "${distro}" != "bullseye" && "${distro}" != "focal" ]]; then
     echo
     echo "Your Linux distribution is currently not supported by Z-Way"
@@ -24,20 +35,22 @@ if [[ "${distro}" != "buster" && "${distro}" != "bullseye" && "${distro}" != "fo
     exit 1
 fi
 
-# Check architecture	
+# Determine the system architecture
 architecture=$(uname -m)
-arch_tag=""
-arch_apt=""
-install_webif=""
 
+# Handle different architectures and set appropriate variables
+# Install additional packages and configure settings based on the architecture
 case "${architecture}" in
     armhf | armv7l)
+        arch_tag=""
+        arch_apt=""
         additional_packets="z-way-full${arch_apt} webif${arch_apt}"
         install_webif="ok"
+        # Install mosquitto for buster distribution
         if [[ "$distro" == "buster" ]]; then
-            wget -O /tmp/mosquitto-repo.gpg.key http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key
+            wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key -O /tmp/mosquitto-repo.gpg.key
             apt-key add /tmp/mosquitto-repo.gpg.key
-            wget -O /etc/apt/sources.list.d/mosquitto-buster.list http://repo.mosquitto.org/debian/mosquitto-buster.list
+            wget http://repo.mosquitto.org/debian/mosquitto-buster.list -O /etc/apt/sources.list.d/mosquitto-buster.list
             apt-get update
             apt-get install mosquitto
         fi
@@ -46,8 +59,9 @@ case "${architecture}" in
     aarch64)
         arch_tag="[arch=armhf]"
         arch_apt=":armhf"
-        additional_packets="z-way-full${arch_apt} webif${arch_apt}"
         install_webif="ok"
+        additional_packets="z-way-full${arch_apt} webif${arch_apt}"
+        # Fix distro_id for Raspberry OS
         if [[ "${distro_id}" == "debian" || "${distro_id}" == "ubuntu" ]]; then
             distro_id="raspbian"
         fi
@@ -55,12 +69,18 @@ case "${architecture}" in
 
     x86_64)
         arch_tag="[arch=amd64]"
+        arch_apt=""
+        install_webif=""
         additional_packets=""
+        
+        # Change distro from bullseye to buster for x86_64
         if [[ "${distro}" == "bullseye" ]]; then
             distro="buster"
         fi
         ;;
+
     *)
+        # Unsupported or unknown architecture, display an error message and exit
         echo
         echo "Your operating system architecture is not supported or unknown"
         echo "Please contact Z-Wave.Me support for more information"
@@ -71,34 +91,39 @@ case "${architecture}" in
         ;;
 esac
 
+# Set minimal packets variable for the installation
 minimal_packets="z-way-server${arch_apt} zbw${arch_apt}"
 
 # Add Z-Wave.Me repository
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 5b2f88a91611e683
 echo "deb ${arch_tag} https://repo.z-wave.me/z-way/${distro_id} ${distro} main" >/etc/apt/sources.list.d/z-wave-me.list
 
-# Update packages list
+# Update package list
 apt-get update -y
 
-# Install Z-Way
+# Install Z-Way server and additional packets depending on the architecture
 if [[ -z "$ZWAY_UPIF" ]]; then
+    # don't update webif if running from webif
     apt-get install --reinstall -y ${minimal_packets} ${additional_packets}
 else
     apt-get install --reinstall -y ${minimal_packets}
 fi
 
-# Check for changed configuration files
+# Check if any configuration files have been changed
 CONF_FILES=$(dpkg-query -W -f='${Conffiles}\n' z-way-server webif zbw | awk 'OFS="  "{print $2,$1}' | LANG=C md5sum --quiet -c 2>/dev/null | cut -f 1 -d :)
 
+# If configuration files have been changed, ask the user if they want to restore them to the default state
 if [[ -n "$CONF_FILES" ]]; then
-    echo "Package configuration files were changes:" $CONF_FILES
+    echo "Package configuration files were changed:" $CONF_FILES
     
     RESTORE_CONFIG_FILE="yes"
     
+    # Prompt the user to restore the configuration files only if the script is not running from webif
     if [[ -z "$ZWAY_UPIF" ]]; then
         read -p "Restore config files to the package default state? (type 'yes' to restore): " RESTORE_CONFIG_FILE < /dev/tty
     fi
     
+    # If the user agrees to restore the configuration files, replace them with the default ones from the package
     if [[ "$RESTORE_CONFIG_FILE" == "yes" ]]; then
         echo "Replacing them by package configuration files"
         TMP_DIR=$(mktemp -d)
@@ -106,11 +131,16 @@ if [[ -n "$CONF_FILES" ]]; then
         pushd $TMP_DIR
         apt-get download z-way-server${arch_apt}
         
+        # Extract and replace the configuration files for z-way-server
         dpkg-deb --fsys-tarfile ./z-way-server*.deb | sudo tar -C / -x ./opt/z-way-server/config/Defaults.xml ./opt/z-way-server/config.xml ./etc/z-way/box_type ./etc/logrotate.d/z-way-server ./etc/init.d/z-way-server
+        
+        # Extract and replace the configuration files for webif if the webif package is installed
         if [[ "${install_webif}" != "" ]]; then
             apt-get download webif${arch_apt}
             dpkg-deb --fsys-tarfile ./webif*.deb | sudo tar -C / -x ./etc/webif.conf ./etc/mongoose/mongoose.conf
         fi
+        
+        # No config files in zbw package, so no need to extract and replace
         
         popd
         rm -R $TMP_DIR
