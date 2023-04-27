@@ -100,6 +100,7 @@ echo "deb ${arch_tag} https://repo.z-wave.me/z-way/${distro_id} ${distro} main" 
 
 # Update package list
 apt-get update -y
+DEBIAN_FRONTEND=noninteractive
 
 # Install Z-Way server and additional packets depending on the architecture
 if [[ -z "$ZWAY_UPIF" ]]; then
