@@ -38,7 +38,7 @@ fi
 architecture=$(uname -m)
 
 case "${architecture}" in
-	armhf | armv7l)
+	armhf | armv6l | armv7l)
 		arch_tag=""
 		arch_apt=""
 		additional_packets="z-way-full${arch_apt} webif${arch_apt}"
