@@ -25,7 +25,7 @@ fi
 
 # Check if the distribution is supported by Z-Way
 # If not, cancel the installation and display an error message
-if [[ "${distro}" != "buster" && "${distro}" != "bullseye" && "${distro}" != "focal" ]]; then
+if [[ "${distro}" != "buster" && "${distro}" != "bullseye" && "${distro}" != "bookworm" && "${distro}" != "focal" ]]; then
     echo
     echo "Your Linux distribution is currently not supported by Z-Way"
     echo "Please contact Z-Wave.Me support for more information"
@@ -75,6 +75,10 @@ case "${architecture}" in
         
         # Change distro from bullseye to buster for x86_64
         if [[ "${distro}" == "bullseye" ]]; then
+            distro="buster"
+        fi
+        # Change distro from bullseye to buster for bookworm
+        if [[ "${distro}" == "bookworm" ]]; then
             distro="buster"
         fi
         ;;
