@@ -62,7 +62,7 @@ case "${architecture}" in
         install_webif="ok"
         additional_packets="z-way-full${arch_apt} webif${arch_apt}"
         # Fix distro_id for Raspberry OS
-        if [[ "${distro_id}" == "debian" || "${distro_id}" == "ubuntu" ]]; then
+        if [[ "${distro_id}" == "debian" || "${distro_id}" == "bookworm" || "${distro_id}" == "ubuntu" ]]; then
             distro_id="raspbian"
         fi
         ;;
