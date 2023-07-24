@@ -51,6 +51,11 @@ case "${architecture}" in
 			apt-get update
 			apt-get install mosquitto
 		fi
+		#temporary support for the debian bookworm distribution
+		if [ "$distro" == "bookworm" ] 
+		then
+			distro="bullseye"
+		fi
 		;;
 
 	aarch64)
@@ -63,6 +68,11 @@ case "${architecture}" in
 		then
 			distro_id="raspbian"
 		fi
+		#temporary support for the debian bookworm distribution
+		if [ "$distro" == "bookworm" ] 
+		then
+			distro="bullseye"
+		fi
 		;;
 
 	x86_64)
@@ -71,10 +81,11 @@ case "${architecture}" in
 		install_webif=""
 		additional_packets=""
 		
-		if [ "${distro}" == "bullseye" ]
+		if [ "${distro}" == "bullseye" -o "${distro}" == "bookworm" ]
 		then
 			distro="buster"
 		fi
+		
 		;;
 	*)
 		echo
