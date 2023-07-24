@@ -141,6 +141,3 @@ then
 		echo "Keeping your changed configuration files"
 	fi
 fi
-        echo "Keeping your changed configuration files"
-    fi
-fi
