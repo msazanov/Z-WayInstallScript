@@ -49,10 +49,14 @@ case "${architecture}" in
 		    # Add old debian repository
 		    echo "deb https://deb.debian.org/debian bullseye main" | sudo tee /etc/apt/sources.list.d/bullseye.list
 		
-		    # Create /etc/apt/preferences.d/bullseye-pin with low priority
+		    # Create /etc/apt/preferences.d/bullseye-pin with low priority for all packages except libwebsockets16
 		    echo "Package: *" | sudo tee /etc/apt/preferences.d/bullseye-pin
 		    echo "Pin: release a=bullseye" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
-		    echo "Pin-Priority: 100" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
+		    echo "Pin-Priority: -1" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
+		
+		    echo "Package: libwebsockets16" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
+		    echo "Pin: release a=bullseye" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
+		    echo "Pin-Priority: 990" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
 		
 		    sudo apt update
 		fi
