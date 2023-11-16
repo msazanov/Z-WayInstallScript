@@ -43,18 +43,18 @@ case "${architecture}" in
 		arch_apt=""
 		additional_packets="z-way-full${arch_apt} webif${arch_apt}"
 		install_webif="ok"
-		if [ "$distro" == "buster" ]
-		then
-			wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key -O /tmp/mosquitto-repo.gpg.key
-			apt-key add /tmp/mosquitto-repo.gpg.key
-			wget http://repo.mosquitto.org/debian/mosquitto-buster.list -O /etc/apt/sources.list.d/mosquitto-buster.list
-			apt-get update
-			apt-get install mosquitto
-		fi
-		#temporary support for the debian bookworm distribution
 		if [ "$distro" == "bookworm" ] 
 		then
-			distro="bullseye"
+		    distro="bullseye"
+		    # Add old debian repository
+		    echo "deb https://deb.debian.org/debian bullseye main" | sudo tee /etc/apt/sources.list.d/bullseye.list
+		
+		    # Create /etc/apt/preferences.d/bullseye-pin with low priority
+		    echo "Package: *" | sudo tee /etc/apt/preferences.d/bullseye-pin
+		    echo "Pin: release a=bullseye" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
+		    echo "Pin-Priority: 100" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
+		
+		    sudo apt update
 		fi
 		;;
 
