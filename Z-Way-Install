@@ -72,6 +72,14 @@ case "${architecture}" in
 		if [ "$distro" == "bookworm" ] 
 		then
 			distro="bullseye"
+			# Add old debian repository
+			echo "deb https://deb.debian.org/debian bullseye main" | sudo tee /etc/apt/sources.list.d/bullseye.list
+			cat <<EOF | sudo tee /etc/apt/preferences.d/bullseye-pin
+			Package: *
+			Pin: release a=bullseye
+			Pin-Priority: 100
+			EOF
+			sudo apt update
 		fi
 		;;
 
