@@ -4,7 +4,7 @@ This repository contains a convenient installation script for Z-Way, a popular Z
 
 ## Prerequisites
 
-- A compatible Linux distribution (Raspbian Buster, Raspbian Bullseye, or Ubuntu 20.04 and higher)
+- A compatible Linux distribution (Raspbian Buster, Raspbian Bullseye, Debian Bookworm, or Ubuntu 20.04 and higher)
 - A supported architecture (armhf, aarch64, or x86_64)
 - Internet access for downloading packages and updates
 
@@ -14,7 +14,7 @@ To install Z-Way using the provided script, run the following command in your te
 
 ```bash
 wget -qO - https://raw.githubusercontent.com/msazanov/Z-WayInstallScript/main/Z-Way-Install | sudo bash
-```
+
 
 The script will automatically detect your Linux distribution and architecture and then proceed with the installation.
 
