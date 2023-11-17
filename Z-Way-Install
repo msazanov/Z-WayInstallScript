@@ -59,6 +59,8 @@ case "${architecture}" in
 		    echo "Pin-Priority: 990" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
 		
 		    sudo apt update
+
+		    f=/boot/config.txt; u="enable_uart=1"; grep -q "^$u$" $f || (sudo sed -i "/^enable_uart/d" $f; echo $u | sudo tee -a $f; echo -e "\e[31mUART is enabled, reboot your RPI...\e[0m")
 		fi
 		;;
 
