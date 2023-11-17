@@ -57,8 +57,15 @@ case "${architecture}" in
 		    echo "Package: libwebsockets16" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
 		    echo "Pin: release a=bullseye" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
 		    echo "Pin-Priority: 990" | sudo tee -a /etc/apt/preferences.d/bullseye-pin
-		
+
 		    sudo apt update
+
+		    if ! tail -n 1 /boot/config.txt | grep -q "^enable_uart=1$"; then
+    		    	sudo sed -i '/^enable_uart/d' /boot/config.txt && echo "enable_uart=1" | sudo tee -a /boot/config.txt
+    			echo -e "\e[31mConfiguration updated. Please reboot your Raspberry Pi for the changes to take effect.\e[0m"
+		    else
+    			echo "enable_uart is already set to 1 at the end of the file."
+		    fi
 		fi
 		;;
 
