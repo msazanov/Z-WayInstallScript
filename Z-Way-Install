@@ -23,7 +23,7 @@ then
 fi
 
 # Cancel installation if distribution is not supported
-if [ "${distro}" != "buster" -a "${distro}" != "bullseye" -a "${distro}" != "focal" ]
+if [ "${distro}" != "buster" -a "${distro}" != "bullseye" -a "${distro}" != "focal"  -a "${distro}" != "bookworm" ]
 then
 	echo
 	echo "Your Linux distribution is currently not supported by Z-Way"
