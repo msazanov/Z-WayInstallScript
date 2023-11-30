@@ -13,7 +13,7 @@ This repository contains a convenient installation script for Z-Way, a popular Z
 To install Z-Way using the provided script, run the following command in your terminal:
 
 ```bash
-wget -qO - https://raw.githubusercontent.com/msazanov/Z-WayInstallScript/main/Z-Way-Install | sudo bash
+wget -qO - https://raw.githubusercontent.com/msazanov/Z-WayInstallScript/stock/Z-Way-Install | sudo bash
 ```
 
 The script will automatically detect your Linux distribution and architecture and then proceed with the installation.
