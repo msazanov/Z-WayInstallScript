@@ -107,7 +107,7 @@ EOF
 		then
 		    distro="focal"
 		    # Add old debian repository
-		    echo "deb deb http://archive.ubuntu.com/ubuntu/ focal main restricted" | sudo tee /etc/apt/sources.list.d/focal.list
+		    echo "deb http://archive.ubuntu.com/ubuntu/ focal main restricted" | sudo tee /etc/apt/sources.list.d/focal.list
 		
 		    cat <<EOF | sudo tee /etc/apt/preferences.d/focal-pin
 Package: *
@@ -119,7 +119,7 @@ Pin: release a=focal
 Pin-Priority: 990
 EOF
 		;;
-	*)
+		*)
 		echo
 		echo "Your operating system architecture is not supported or unknown"
 		echo "Please contact Z-Wave.Me support for more information"
