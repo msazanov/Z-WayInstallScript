@@ -107,7 +107,7 @@ EOF
 		then
 		    distro="focal"
 		    # Add old debian repository
-		    echo "deb deb http://archive.ubuntu.com/ubuntu/ focal main restricted" | sudo tee /etc/apt/sources.list.d/bullseye.list
+		    echo "deb deb http://archive.ubuntu.com/ubuntu/ focal main restricted" | sudo tee /etc/apt/sources.list.d/focal.list
 		
 		    cat <<EOF | sudo tee /etc/apt/preferences.d/focal-pin
 Package: *
