@@ -118,6 +118,8 @@ Package: libssl1.1
 Pin: release a=focal
 Pin-Priority: 990
 EOF
+		    sudo apt update
+		fi
 		;;
 		*)
 		echo
