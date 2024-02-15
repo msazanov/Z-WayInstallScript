@@ -23,12 +23,12 @@ then
 fi
 
 # Cancel installation if distribution is not supported
-if [ "${distro}" != "buster" -a "${distro}" != "bullseye" -a "${distro}" != "focal"  -a "${distro}" != "bookworm" ]
+if [ "${distro}" != "buster" -a "${distro}" != "bullseye" -a "${distro}" != "focal" -a "${distro}" != "bookworm" ]
 then
 	echo
 	echo "Your Linux distribution is currently not supported by Z-Way"
 	echo "Please contact Z-Wave.Me support for more information"
-	echo "Supported Raspbian or Debian distributions are Buster and Bullseye"
+	echo "Supported Raspbian or Debian distributions are Buster, Bullseye and Bookworm"
 	echo "Supported Ubuntu distribution are 20.04 and upper"
 	echo
 	exit 1
@@ -50,6 +50,11 @@ case "${architecture}" in
 			wget http://repo.mosquitto.org/debian/mosquitto-buster.list -O /etc/apt/sources.list.d/mosquitto-buster.list
 			apt-get update
 			apt-get install mosquitto
+		fi
+		# fix distro_id for Raspberry OS
+		if [ "${distro_id}" == "debian" -o "${distro_id}" == "ubuntu" ]
+		then
+			distro_id="raspbian"
 		fi
 		;;
 
