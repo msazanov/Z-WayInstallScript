@@ -43,6 +43,11 @@ case "${architecture}" in
 		arch_apt=""
 		additional_packets="z-way-full${arch_apt} webif${arch_apt}"
 		install_webif="ok"
+		# fix distro_id for Raspberry OS
+		if [ "${distro_id}" == "debian" -o "${distro_id}" == "ubuntu" ]
+		then
+			distro_id="raspbian"
+		fi
 		if [ "$distro" == "bookworm" ] 
 		then
 		    distro="bullseye"
