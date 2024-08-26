@@ -42,8 +42,16 @@ case "${architecture}" in
     armhf | armv6l | armv7l | aarch64)
         # For armhf, armv6l, armv7l, and aarch64 architectures, use raspbian
         distro_id="raspbian"
-        # Ensure distro is set to bookworm, the latest supported Debian release
-        distro="bookworm"
+        # Check the distro and set it accordingly
+        case "${distro}" in
+            buster | bullseye | bookworm)
+                # Keep the actual distro
+                ;;
+            *)
+                # If the distro is unrecognized, default to bookworm
+                distro="bookworm"
+                ;;
+        esac
         ;;
     x86_64)
         # For x86_64 architecture
