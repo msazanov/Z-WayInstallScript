@@ -42,6 +42,8 @@ case "${architecture}" in
     armhf | armv6l | armv7l | aarch64)
         # For armhf, armv6l, armv7l, and aarch64 architectures, use raspbian
         distro_id="raspbian"
+        # Ensure distro is set to bookworm, the latest supported Debian release
+        distro="bookworm"
         ;;
     x86_64)
         # For x86_64 architecture
@@ -73,6 +75,7 @@ case "${architecture}" in
         exit 1
         ;;
 esac
+
 minimal_packets="z-way-server${arch_apt} zbw${arch_apt}"
 
 # Add Z-Wave.Me repository
