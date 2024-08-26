@@ -39,40 +39,35 @@ architecture=$(uname -m)
 
 # Determine distro_id based on architecture and distribution
 case "${architecture}" in
-    armhf | armv6l | armv7l | aarch64)
-        # For armhf, armv6l, armv7l, and aarch64 architectures, use raspbian
+    armhf)
+        # For armhf architecture, use raspbian with armhf
         distro_id="raspbian"
         arch_tag="[arch=armhf]"
-        # If architecture is aarch64, append :armhf to package names
-        if [ "${architecture}" == "aarch64" ]; then
-            arch_apt=":armhf"
-        fi
-        # Check the distro and set it accordingly
-        case "${distro}" in
-            buster | bullseye | bookworm)
-                # Keep the actual distro
-                ;;
-            *)
-                # If the distro is unrecognized, default to bookworm
-                distro="bookworm"
-                ;;
-        esac
+        ;;
+    aarch64)
+        # For aarch64 architecture, use raspbian with arm64
+        distro_id="raspbian"
+        arch_tag="[arch=arm64]"
+        # Append :armhf to package names for compatibility
+        arch_apt=":armhf"
+        ;;
+    armv6l | armv7l)
+        # For armv6l and armv7l, use raspbian with armhf
+        distro_id="raspbian"
+        arch_tag="[arch=armhf]"
         ;;
     x86_64)
-        # For x86_64 architecture, use debian or ubuntu
+        # For x86_64 architecture, use debian or ubuntu with amd64
         arch_tag="[arch=amd64]"
         if [ "${distro_id}" == "ubuntu" ]; then
-            # If the distribution is Ubuntu and the version is 20.04 or higher, use ubuntu with focal
             distro="focal"
             distro_id="ubuntu"
         else
-            # If the distribution is Debian, check its version
             case "${distro}" in
                 buster | bullseye | bookworm)
                     distro_id="debian"
                     ;;
                 *)
-                    # If the Debian distribution is unknown, use bookworm
                     distro="bookworm"
                     distro_id="debian"
                     ;;
@@ -89,6 +84,19 @@ case "${architecture}" in
         exit 1
         ;;
 esac
+
+# Handle unknown distributions for arm architectures
+if [ "${distro_id}" == "raspbian" ]; then
+    case "${distro}" in
+        buster | bullseye | bookworm)
+            # Keep the actual distro
+            ;;
+        *)
+            # If the distro is unrecognized, default to bookworm
+            distro="bookworm"
+            ;;
+    esac
+fi
 
 minimal_packets="z-way-server${arch_apt} zbw${arch_apt}"
 
