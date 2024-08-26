@@ -11,7 +11,7 @@ apt-get install dirmngr apt-transport-https gnupg wget -y
 apt-get install lsb_release >/dev/null 2>&1 # try the built-in tool first (if present)
 
 distro=$(lsb_release -a 2>/dev/null | grep Codename | awk '{print $2}')
-if [ "${distro}" == "" -o "${distro}" ==	 "n/a" ]
+if [ "${distro}" == "" -o "${distro}" == "n/a" ]
 then
 	distro=$(cat /etc/os-release | grep VERSION_CODENAME | awk -F"=" '{print $2}')
 fi
@@ -34,27 +34,19 @@ then
 	exit 1
 fi
 
-# Check architecture	
+# Check architecture
 architecture=$(uname -m)
 
 # Determine distro_id based on architecture and distribution
 case "${architecture}" in
-    armhf)
-        # For armhf architecture, use raspbian with armhf
+    armhf | armv6l | armv7l | aarch64)
+        # For ARM architectures (including aarch64), use raspbian with armhf
         distro_id="raspbian"
         arch_tag="[arch=armhf]"
-        ;;
-    aarch64)
-        # For aarch64 architecture, use raspbian with arm64
-        distro_id="raspbian"
-        arch_tag="[arch=arm64]"
-        # Append :armhf to package names for compatibility
-        arch_apt=":armhf"
-        ;;
-    armv6l | armv7l)
-        # For armv6l and armv7l, use raspbian with armhf
-        distro_id="raspbian"
-        arch_tag="[arch=armhf]"
+        # For aarch64, append :armhf to package names for compatibility
+        if [ "${architecture}" == "aarch64" ]; then
+            arch_apt=":armhf"
+        fi
         ;;
     x86_64)
         # For x86_64 architecture, use debian or ubuntu with amd64
@@ -85,7 +77,7 @@ case "${architecture}" in
         ;;
 esac
 
-# Handle unknown distributions for arm architectures
+# Handle unknown distributions for ARM architectures
 if [ "${distro_id}" == "raspbian" ]; then
     case "${distro}" in
         buster | bullseye | bookworm)
