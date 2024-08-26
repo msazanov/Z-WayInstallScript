@@ -11,7 +11,7 @@ apt-get install dirmngr apt-transport-https gnupg wget -y
 apt-get install lsb_release >/dev/null 2>&1 # try the built-in tool first (if present)
 
 distro=$(lsb_release -a 2>/dev/null | grep Codename | awk '{print $2}')
-if [ "${distro}" == "" -o "${distro}" == "n/a" ]
+if [ "${distro}" == "" -o "${distro}" ==	 "n/a" ]
 then
 	distro=$(cat /etc/os-release | grep VERSION_CODENAME | awk -F"=" '{print $2}')
 fi
@@ -37,59 +37,41 @@ fi
 # Check architecture	
 architecture=$(uname -m)
 
+# Determine distro_id based on architecture and distribution
 case "${architecture}" in
-	armhf | armv6l | armv7l)
-		arch_tag=""
-		arch_apt=""
-		additional_packets="z-way-full${arch_apt} webif${arch_apt}"
-		install_webif="ok"
-		if [ "$distro" == "buster" ]
-		then
-			wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key -O /tmp/mosquitto-repo.gpg.key
-			apt-key add /tmp/mosquitto-repo.gpg.key
-			wget http://repo.mosquitto.org/debian/mosquitto-buster.list -O /etc/apt/sources.list.d/mosquitto-buster.list
-			apt-get update
-			apt-get install mosquitto
-		fi
-		# fix distro_id for Raspberry OS
-		if [ "${distro_id}" == "debian" -o "${distro_id}" == "ubuntu" ]
-		then
-			distro_id="raspbian"
-		fi
-		;;
-
-	aarch64)
-		arch_tag="[arch=armhf]"
-		arch_apt=":armhf"
-		install_webif="ok"
-		additional_packets="z-way-full${arch_apt} webif${arch_apt}"
-		# fix distro_id for Raspberry OS
-		if [ "${distro_id}" == "debian" -o "${distro_id}" == "ubuntu" ]
-		then
-			distro_id="raspbian"
-		fi
-		;;
-
-	x86_64)
-		arch_tag="[arch=amd64]"
-		arch_apt=""
-		install_webif=""
-		additional_packets=""
-		
-		if [ "${distro}" == "bullseye" ]
-		then
-			distro="buster"
-		fi
-		;;
-	*)
-		echo
-		echo "Your operating system architecture is not supported or unknown"
-		echo "Please contact Z-Wave.Me support for more information"
-		echo "Supported architectures: armhf, aarch64, x86_64"
-		echo "Your architecture: ${architecture} and your distro is ${distro_id} ${distro}"
-		echo
-		exit 1
-		;;
+    armhf | armv6l | armv7l | aarch64)
+        # For armhf, armv6l, armv7l, and aarch64 architectures, use raspbian
+        distro_id="raspbian"
+        ;;
+    x86_64)
+        # For x86_64 architecture
+        if [ "${distro_id}" == "ubuntu" ]; then
+            # If the distribution is Ubuntu and the version is 20.04 or higher, use ubuntu with focal
+            distro="focal"
+            distro_id="ubuntu"
+        else
+            # If the distribution is Debian, check its version
+            case "${distro}" in
+                buster | bullseye | bookworm)
+                    distro_id="debian"
+                    ;;
+                *)
+                    # If the Debian distribution is unknown, use bookworm
+                    distro="bookworm"
+                    distro_id="debian"
+                    ;;
+            esac
+        fi
+        ;;
+    *)
+        echo
+        echo "Your system architecture is not supported or unknown"
+        echo "Please contact Z-Wave.Me support for more information"
+        echo "Supported architectures: armhf, aarch64, x86_64"
+        echo "Your architecture: ${architecture} and your distribution: ${distro_id} ${distro}"
+        echo
+        exit 1
+        ;;
 esac
 minimal_packets="z-way-server${arch_apt} zbw${arch_apt}"
 
