@@ -23,15 +23,29 @@ then
 fi
 
 # Cancel installation if distribution is not supported
-if [ "${distro}" != "buster" -a "${distro}" != "bullseye" -a "${distro}" != "focal" -a "${distro}" != "bookworm" ]
-then
-	echo
-	echo "Your Linux distribution is currently not supported by Z-Way"
-	echo "Please contact Z-Wave.Me support for more information"
-	echo "Supported Raspbian or Debian distributions are Buster, Bullseye and Bookworm"
-	echo "Supported Ubuntu distribution are 20.04 and upper"
-	echo
-	exit 1
+if [ -f /etc/debian_version ]; then
+    distro_family="debian"
+    version=$(cut -d'.' -f1 < /etc/debian_version)
+elif grep -q "Ubuntu" /etc/os-release; then
+    distro_family="ubuntu"
+    version=$(grep "VERSION_ID" /etc/os-release | cut -d'"' -f2 | cut -d'.' -f1)
+else
+    echo
+    echo "Z-Way server can only be installed on Debian-based systems starting from Debian Buster (10)."
+    echo "Your system does not belong to the Debian/Ubuntu family. Installation will be aborted."
+    echo
+    exit 1
+fi
+
+# Проверка минимальных версий
+if { [ "$distro_family" == "debian" ] && [ "$version" -lt 10 ]; } || \
+   { [ "$distro_family" == "ubuntu" ] && [ "$version" -lt 20 ]; }; then
+    echo
+    echo "Your Linux distribution is currently not supported by Z-Way"
+    echo "Supported Debian-based distributions start from Buster (Debian 10)"
+    echo "Supported Ubuntu-based distributions start from 20.04 (Focal)"
+    echo
+    exit 1
 fi
 
 # Check architecture
